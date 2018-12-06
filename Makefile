@@ -1,19 +1,48 @@
-SHELL := /bin/bash
-
 .PHONY: new
 
 all: help
 
-FNAME=`echo $(title) | sed -e 's/ /_/'`
-STATUS=draft
-LABELS=
+ifndef $(EDITOR)
+	EDITOR=vim
+endif
 
-.ONESHELL:
+ifndef $(labels)
+	labels=
+endif
+
+IDX=.idx
+CURR_IDX=$$(cat $(IDX))
+FNAME=$$(echo $(CURR_IDX)_$(title).md | sed -e 's/ /_/g')
+
+# .ONESHELL:
+## new: create new ADR. Example: make new title="ADR title" labels="serviceA,go,java"
 new:
-	cp .template.md $(FNAME)
-	# @sed -i -e 's/@TITLE/$(title)/g' $(FNAME)
+	@$(eval f=$(FNAME))
+	echo $(f)
+	@cp .template.md $(FNAME)
+	@sed -i -e 's/@TITLE/$(title)/g' $(FNAME)
+	@sed -i -e 's/@LABELS/$(labels)/g' $(FNAME)
+	@echo `expr $(CURR_IDX) + 1` > $(IDX) 
+	$(EDITOR) $(file)
+	# ifeq ($(ADR_GIT), 1)
+	# 	@git add $(FNAME) $(IDX)
+	#	@git commit -m "$(TITLE)"
+	#	@git push
+	# endif
 
-help:
-	help="Architectural Decisions Record\n
+SEARCH_FILTER=$$(echo $(label) | sed -e 's/,/|/g')
 
-	@echo "Help meeee!"
+## search: searches ARD by label. Example: make search label=serviceA
+search:
+	@ag -l "labels=(.*,)*($(SEARCH_FILTER)).*" 
+
+LINK_FROM=$$(find . -name "$(from)_*.md" | cut -c 3-)
+LINK_TO=$$(find . -name "$(to)_*.md" | cut -c 3-)
+
+## link: links one ADR in another. Example: make link from=10 to=1
+link:
+	@echo "* [$(LINK_FROM)]" >> $(LINK_TO)
+
+help: Makefile
+	@echo " Architectural Decisions Records. Choose a command run:"
+	@sed -n 's/^##//p' $< | column -t -s ':' |  sed -e 's/^/ /'

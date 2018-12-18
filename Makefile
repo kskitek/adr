@@ -3,12 +3,13 @@
 all: help
 
 ifndef $(EDITOR)
-	EDITOR=vim
+	@EDITOR=vim
 endif
 
 ifndef $(labels)
-	labels=
+	@labels=
 endif
+
 
 IDX=.idx
 CURR_IDX=$$(cat $(IDX))
@@ -18,23 +19,19 @@ FNAME=$$(echo $(CURR_IDX)_$(title).md | sed -e 's/ /_/g')
 ## new: create new ADR. Example: make new title="ADR title" labels="serviceA,go,java"
 new:
 	@$(eval f=$(FNAME))
-	echo $(f)
 	@cp .template.md $(FNAME)
-	@sed -i -e 's/@TITLE/$(title)/g' $(FNAME)
-	@sed -i -e 's/@LABELS/$(labels)/g' $(FNAME)
+	@sed -ie 's/@TITLE/$(title)/g' $(FNAME)
+	@sed -ie 's/@LABELS/$(labels)/g' $(FNAME)
+	@echo "Record created: $(FNAME)"
 	@echo `expr $(CURR_IDX) + 1` > $(IDX) 
-	$(EDITOR) $(file)
-	# ifeq ($(ADR_GIT), 1)
-	# 	@git add $(FNAME) $(IDX)
-	#	@git commit -m "$(TITLE)"
-	#	@git push
-	# endif
+
 
 SEARCH_FILTER=$$(echo $(label) | sed -e 's/,/|/g')
 
 ## search: searches ARD by label. Example: make search label=serviceA
 search:
-	@ag -l "labels=(.*,)*($(SEARCH_FILTER)).*" 
+	@ag -l "^labels=(.*,)*($(SEARCH_FILTER)).*" 
+
 
 LINK_FROM=$$(find . -name "$(from)_*.md" | cut -c 3-)
 LINK_TO=$$(find . -name "$(to)_*.md" | cut -c 3-)

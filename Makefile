@@ -20,8 +20,8 @@ FNAME=$$(echo $(CURR_IDX)_$(title).md | sed -e 's/ /_/g')
 new:
 	@$(eval f=$(FNAME))
 	@cp .template.md $(FNAME)
-	@sed -ie 's/@TITLE/$(title)/g' $(FNAME)
-	@sed -ie 's/@LABELS/$(labels)/g' $(FNAME)
+	@sed -i '' -e 's/@TITLE/$(title)/g' $(FNAME)
+	@sed -i '' -e 's/@LABELS/$(labels)/g' $(FNAME)
 	@echo "Record created: $(FNAME)"
 	@echo `expr $(CURR_IDX) + 1` > $(IDX) 
 
